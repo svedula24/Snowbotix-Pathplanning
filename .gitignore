@@ -1,6 +1,9 @@
 # Virtual environment
 snow-pplan/
 
+# Spec doc
+path_planning_spec.md
+
 # Python
 __pycache__/
 *.pyc
