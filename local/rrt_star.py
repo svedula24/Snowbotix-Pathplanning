@@ -25,7 +25,7 @@ class RRTStar(Planner):
         step_size: float = 5.0,
         goal_bias: float = 0.1,
         neighbor_radius: float = 15.0,
-        max_iterations: int = 5000,
+        max_iterations: int = 100000,
     ):
         self.map = map_obj
         self.step_size = step_size
@@ -242,7 +242,7 @@ class RRTStar(Planner):
 if __name__ == "__main__":
     import os
     here = os.path.dirname(os.path.abspath(__file__))
-    map_path = os.path.join(here, "maps", "test_map.png")
+    map_path = os.path.join(here, "maps", "hard_map.png")
 
     if not os.path.exists(map_path):
         from map import generate_test_map

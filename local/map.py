@@ -130,6 +130,16 @@ def generate_hard_map(path: str, width=100, height=100, seed=42):
                 if 0 <= nx < width and 0 <= ny < height:
                     grid[ny, nx] = 0
 
+    # Carve a narrow 2-cell wide L-shaped corridor to guarantee solvability:
+    # horizontal leg: y=4-5, x=5->90 (passes through top gaps of all vertical walls)
+    # vertical leg:   x=89-90, y=5->90 (passes through right gaps of horizontal walls)
+    for x in range(5, 91):
+        for y in [4, 5]:
+            grid[y, x] = 0
+    for y in range(5, 91):
+        for x in [89, 90]:
+            grid[y, x] = 0
+
     img_arr = np.ones((height, width), dtype=np.uint8) * 255
     img_arr[grid == 1] = 0
     os.makedirs(os.path.dirname(path), exist_ok=True)
