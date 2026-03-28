@@ -40,7 +40,3 @@ python d_star_lite.py
 python test_rrt.py
 python test_dstar.py
 ```
-
-## Stack
-
-Python, NumPy, Matplotlib — ROS2 + Gazebo integration planned for Phase 2.
