@@ -168,7 +168,7 @@ class RRTStar(Planner):
         """Bresenham line check — returns True if segment is fully in free space."""
         points = self._bresenham(int(x0), int(y0), int(x1), int(y1))
         return all(self.map.is_free(px, py) for px, py in points)
-
+    
     @staticmethod
     def _bresenham(x0, y0, x1, y1) -> list[tuple]:
         points = []

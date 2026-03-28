@@ -48,7 +48,7 @@ class DStarLite(Planner):
 
         self._rhs[goal] = 0.0
         self._push(goal, self._key(goal))
-        self._compute_shortest_path()
+        self._compute_shortest_path(full=True)
         self._path = self._extract_path()
         return self._path
 
@@ -137,14 +137,15 @@ class DStarLite(Planner):
         if self._g[u] != self._rhs[u]:
             self._push(u, self._key(u))
 
-    def _compute_shortest_path(self):
+    def _compute_shortest_path(self, full=False):
         while True:
             top_key = self._top_key()
-            start_key = self._key(self._start)
-            if top_key >= start_key and self._rhs[self._start] == self._g[self._start]:
-                break
             if top_key == (INF, INF):
                 break
+            if not full:
+                start_key = self._key(self._start)
+                if top_key >= start_key and self._rhs[self._start] == self._g[self._start]:
+                    break
             k_old, u = self._pop()
             if u is None:
                 break
@@ -170,7 +171,6 @@ class DStarLite(Planner):
 
         path = [self._start]
         current = self._start
-        visited = {self._start}
 
         for _ in range(self.map.width * self.map.height):
             if current == self._goal:
@@ -180,13 +180,13 @@ class DStarLite(Planner):
             best_cost = INF
             for nb in neighbors:
                 cost = self._edge_cost(current, nb) + self._g[nb]
-                if cost < best_cost and nb not in visited:
+                if cost < best_cost:
                     best_cost = cost
                     best = nb
-            if best is None:
+            # g-values must strictly decrease toward goal — if not, we're stuck
+            if best is None or self._g[best] >= self._g[current] - 1e-9:
                 raise PlanningFailure("Path extraction failed — no forward progress.")
             path.append(best)
-            visited.add(best)
             current = best
 
         if current != self._goal:
@@ -232,7 +232,7 @@ class DStarLite(Planner):
 if __name__ == "__main__":
     import os
     here = os.path.dirname(os.path.abspath(__file__))
-    map_path = os.path.join(here, "maps", "test_map.png")
+    map_path = os.path.join(here, "maps", "hard_map.png")
 
     if not os.path.exists(map_path):
         from map import generate_test_map
