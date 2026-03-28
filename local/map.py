@@ -94,6 +94,51 @@ def generate_test_map(path: str, width=100, height=100, obstacle_density=0.20, s
     return Map(width, height, grid)
 
 
+def generate_hard_map(path: str, width=100, height=100, seed=42):
+    """
+    Generate a harder 100x100 map with:
+    - 35% random obstacles
+    - Several dense wall clusters
+    - No guaranteed corridor; only start and goal zones are cleared
+    """
+    rng = np.random.default_rng(seed)
+    grid = np.zeros((height, width), dtype=np.int8)
+
+    # Random obstacles at higher density
+    mask = rng.random((height, width)) < 0.35
+    grid[mask] = 1
+
+    # Dense wall clusters (horizontal and vertical barriers with narrow gaps)
+    walls = [
+        ((20, 10), (20, 75)),   # vertical wall, gap at bottom
+        ((50, 25), (50, 90)),   # vertical wall, gap at top
+        ((75, 10), (75, 65)),   # vertical wall, gap at bottom
+        ((10, 40), (85, 40)),   # horizontal wall, gap on right
+        ((15, 65), (70, 65)),   # horizontal wall, gap on right
+    ]
+    for (x0, y0), (x1, y1) in walls:
+        for x in range(min(x0, x1), max(x0, x1) + 1):
+            for y in range(min(y0, y1), max(y0, y1) + 1):
+                if 0 <= x < width and 0 <= y < height:
+                    grid[y, x] = 1
+
+    # Clear start and goal zones only
+    for dx in range(-3, 4):
+        for dy in range(-3, 4):
+            for sx, sy in [(5, 5), (90, 90)]:
+                nx, ny = sx + dx, sy + dy
+                if 0 <= nx < width and 0 <= ny < height:
+                    grid[ny, nx] = 0
+
+    img_arr = np.ones((height, width), dtype=np.uint8) * 255
+    img_arr[grid == 1] = 0
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    Image.fromarray(img_arr).save(path)
+    print(f"Hard map saved to {path}")
+    return Map(width, height, grid)
+
+
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     generate_test_map(os.path.join(here, "maps", "test_map.png"))
+    generate_hard_map(os.path.join(here, "maps", "hard_map.png"))
